@@ -1,0 +1,30 @@
+ body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background:  #e6ffff;
+    }
+    .calculator {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        max-width: 400px;
+    }
+    .calculator button {
+       height:60px;
+       min-width: 35px;
+    }
+    .calculator .display {
+        grid-column: span 5;
+         background: #e7eaf6; 
+          height:60px;
+    }
+    .calculator .wide {
+        grid-column: span 2;
+    }
+   
+   #binary,#both{
+    height:15px;
+    width: 15px; 
+   }

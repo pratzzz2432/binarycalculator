@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>_BInary_calculator_</title>
+    <link rel="stylesheet" href="220101098_bical.css">
+</head>
+
+<body>
+    <div class="calculator">
+        <input type="submit" class="display" id="num" value="">
+        <button onclick="appendNumber('0')">0</button>
+        <button onclick="appendNumber('1')">1</button>
+        <button onclick="calculate()">=</button>
+        <button onclick="reset()" class="wide">Reset</button>
+        <button onclick="prevOperation()" class="wide"><< Prev Operation</button>
+        <button onclick="nextOperation()" class="wide">Next Operation >></button>
+        <button onclick="chooseOperation('&')">Bitwise AND</button>
+        <button onclick="chooseOperation('|')">Bitwise OR</button>
+        <button onclick="chooseOperation('^')">Bitwise XOR</button>
+        <button onclick="chooseOperation('~')">Bitwise NOT</button>
+        <button onclick="chooseOperation('<<')">Left Shift</button>
+        <button onclick="chooseOperation('>>')">Right Shift</button>
+        <button onclick="chooseOperation('&&')">Logical AND</button>
+        <button onclick="chooseOperation('||')">Logical OR</button><br><hr><br><br>
+        <input type="radio" id="binary" name="displayMode" onclick="setDisplayModeBinary()" checked>
+        <label for="binary">ONLY BINARY</label>
+        <input type="radio" id="both" name="displayMode" onclick="setDisplayModeBoth()">
+        <label for="both">BOTH</label>
+    </div>
+    <script>
+        let display = document.querySelector('.display');
+        let currentOperation = null;
+        let operand1 = '';
+        let operand2 = '';
+        let displayMode = 'binary';
+        let history = [];
+        let historyIndex = -1;
+
+        function appendNumber(number) {
+            if (currentOperation === null) {
+                operand1 += number;
+            } else {
+                operand2 += number;
+            }
+            updateDisplay();
+        }
+
+        function chooseOperation(operation) {
+            if (operand1 === '') return;
+            currentOperation = operation;
+            updateDisplay();
+        }
+
+        function calculate() {
+            let result;
+            if (operand1 === '' || operand2 === '' || currentOperation === null) {
+                alert('Error: Please enter two operands and choose an operation.');
+                return;
+            }
+
+            // Perform the operation based on the selected operator
+            switch (currentOperation) {
+                case '&':
+                    result = bitwiseAND(operand1, operand2);
+                    break;
+                case '|':
+                    result = bitwiseOR(operand1, operand2);
+                    break;
+                case '^':
+                    result = bitwiseXOR(operand1, operand2);
+                    break;
+                case '~':
+                    result = bitwiseNOT(operand1);
+                    operand2 = ''; // For bitwise NOT, clear operand2
+                    break;
+                case '<<':
+                    result = leftShift(operand1, operand2);
+                    break;
+                case '>>':
+                    result = rightShift(operand1, operand2);
+                    break;
+                case '&&':
+                    result = logicalAND(operand1, operand2);
+                    break;
+                case '||':
+                    result = logicalOR(operand1, operand2);
+                    break;
+                default:
+                    alert('Error: Invalid operation.');
+                    return;
+            }
+
+            // Update the operands and display the result
+            operand1 = result;
+            operand2 = '';
+            currentOperation = null;
+            history.push({ operand1, operand2, currentOperation, result });
+            historyIndex = history.length - 1;
+            updateDisplay();
+        }
+
+        function reset() {
+            operand1 = '';
+            operand2 = '';
+            currentOperation = null;
+            updateDisplay();
+        }
+
+        function prevOperation() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                let operation = history[historyIndex];
+                operand1 = operation.operand1;
+                operand2 = operation.operand2;
+                currentOperation = operation.currentOperation;
+                updateDisplay();
+            }
+        }
+
+        function nextOperation() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                let operation = history[historyIndex];
+                operand1 = operation.operand1;
+                operand2 = operation.operand2;
+                currentOperation = operation.currentOperation;
+                updateDisplay();
+            }
+        }
+
+        function setDisplayModeBinary() {
+            displayMode = 'binary';
+            updateDisplay();
+        }
+
+        function setDisplayModeBoth() {
+            displayMode = 'both';
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            let displayValue = operand1 + (currentOperation !== null ? ' ' + currentOperation + ' ' : '') + operand2;
+            if (displayMode === 'both') {
+                let decimalValue = binaryToDecimal(displayValue);
+                displayValue += ' (' + decimalValue + ')';
+            }
+            display.value = displayValue;
+        }
+
+        // Bitwise Operations
+        function bitwiseAND(a, b) {
+            let result = '';
+            for (let i = 0; i < Math.max(a.length, b.length); i++) {
+                result += (parseInt(a[i] || '0') & parseInt(b[i] || '0')).toString();
+            }
+            return result;
+        }
+
+        function bitwiseOR(a, b) {
+            let result = '';
+            for (let i = 0; i < Math.max(a.length, b.length); i++) {
+                result += (parseInt(a[i] || '0') | parseInt(b[i] || '0')).toString();
+            }
+            return result;
+        }
+
+        function bitwiseXOR(a, b) {
+            let result = '';
+            for (let i = 0; i < Math.max(a.length, b.length); i++) {
+                result += (parseInt(a[i] || '0') ^ parseInt(b[i] || '0')).toString();
+            }
+            return result;
+        }
+
+        function bitwiseNOT(a) {
+            let result = '';
+            for (let i = 0; i < a.length; i++) {
+                result += (parseInt(a[i] || '0') ? '0' : '1');
+            }
+            return result;
+        }
+
+        function leftShift(a, b) {
+            return a.padEnd(a.length + parseInt(b || '0', 2), '0');
+        }
+
+        function rightShift(a, b) {
+            return a.padStart(a.length - parseInt(b || '0', 2), '0').substring(0, a.length);
+        }
+
+        function logicalAND(a, b) {
+            return (parseInt(a, 2) && parseInt(b, 2)).toString();
+        }
+
+        function logicalOR(a, b) {
+            return (parseInt(a, 2) || parseInt(b, 2)).toString();
+        }
+
+        function binaryToDecimal(binary) {
+            let decimal = 0;
+            for (let i = binary.length - 1, j = 0; i >= 0; i--, j++) {
+                if (binary[i] === '1') {
+                    decimal += Math.pow(2, j);
+                }
+            }
+            return decimal;
+        }
+    </script>
+</body>
+</html>
+
